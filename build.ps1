@@ -54,16 +54,19 @@ if ($Package) {
     New-Item -ItemType Directory -Path $dist -Force | Out-Null
     New-Item -ItemType Directory -Path $archiveRoot -Force | Out-Null
 
-    $folderPath = Join-Path $dist "DadsVeinmine-$($manifest.version_number)"
-    $zipPath = Join-Path $dist "DadsVeinmine-$($manifest.version_number).zip"
     $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
-    if (Test-Path -LiteralPath $folderPath) {
-        Move-Item -LiteralPath $folderPath -Destination (Join-Path $archiveRoot "DadsVeinmine-$($manifest.version_number)-$stamp")
-    }
-    if (Test-Path -LiteralPath $zipPath -PathType Leaf) {
-        Move-Item -LiteralPath $zipPath -Destination (Join-Path $archiveRoot "DadsVeinmine-$($manifest.version_number)-$stamp.zip")
+    foreach ($artifact in Get-ChildItem -LiteralPath $dist -Force) {
+        $archiveName = if ($artifact.PSIsContainer) {
+            "$($artifact.Name)-$stamp"
+        }
+        else {
+            "$($artifact.BaseName)-$stamp$($artifact.Extension)"
+        }
+        Move-Item -LiteralPath $artifact.FullName -Destination (Join-Path $archiveRoot $archiveName)
     }
 
+    $folderPath = Join-Path $dist "DadsVeinmine-$($manifest.version_number)"
+    $zipPath = Join-Path $dist "DadsVeinmine-$($manifest.version_number).zip"
     New-Item -ItemType Directory -Path $folderPath | Out-Null
     foreach ($entry in $entries.GetEnumerator()) {
         Copy-Item -LiteralPath $entry.Value -Destination (Join-Path $folderPath $entry.Key)

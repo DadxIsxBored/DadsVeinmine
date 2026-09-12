@@ -1,6 +1,6 @@
 {
   "name": "DadsVeinmine",
-  "version_number": "1.0.1",
+  "version_number": "1.0.2",
   "website_url": "https://github.com/DadxIsxBored/DadsVeinmine",
   "description": "Configurable whole-deposit vein mining built for Valheim 1.0.12.",
   "dependencies": [
