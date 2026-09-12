@@ -28,14 +28,11 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
     internal static DadsVeinminePlugin Instance = null!;
     internal static ConfigEntry<ActivationModes> ActivationMode = null!;
     internal static ConfigEntry<KeyboardShortcut> ActivationKey = null!;
-    internal static ConfigEntry<int> MaximumSections = null!;
     internal static ConfigEntry<int> SectionsPerFrame = null!;
     internal static ConfigEntry<string> ExcludedPrefabFragments = null!;
     internal static ConfigEntry<bool> ProgressiveMode = null!;
     internal static ConfigEntry<float> ProgressiveRadiusMultiplier = null!;
     internal static ConfigEntry<float> MinimumProgressiveRadius = null!;
-    internal static ConfigEntry<bool> AdditionalDurabilityCost = null!;
-    internal static ConfigEntry<float> DurabilityCostMultiplier = null!;
     internal static ConfigEntry<float> AdditionalStaminaPerSection = null!;
     internal static ConfigEntry<float> ExtraSkillGainMultiplier = null!;
 
@@ -68,13 +65,6 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
             new KeyboardShortcut(KeyCode.LeftAlt),
             "Key held while striking a mine rock or ore deposit in HoldKey mode.");
 
-        MaximumSections = Config.Bind(
-            "2 - Mining",
-            "Maximum Sections",
-            256,
-            new ConfigDescription(
-                "Maximum rock sections processed from one strike.",
-                new AcceptableValueRange<int>(1, 2048)));
         SectionsPerFrame = Config.Bind(
             "2 - Mining",
             "Sections Per Frame",
@@ -108,18 +98,6 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
                 "Minimum radius used while progressive mining is enabled.",
                 new AcceptableValueRange<float>(0.1f, 100f)));
 
-        AdditionalDurabilityCost = Config.Bind(
-            "4 - Costs",
-            "Additional Durability Cost",
-            true,
-            "Charge pickaxe durability for every section after the first.");
-        DurabilityCostMultiplier = Config.Bind(
-            "4 - Costs",
-            "Durability Cost Multiplier",
-            1f,
-            new ConfigDescription(
-                "Multiplier applied to normal pickaxe durability drain for additional sections.",
-                new AcceptableValueRange<float>(0f, 100f)));
         AdditionalStaminaPerSection = Config.Bind(
             "4 - Costs",
             "Additional Stamina Per Section",
@@ -175,24 +153,32 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
         bool additionalSection = job.NextTarget > 0;
         if (additionalSection)
         {
-            if (AdditionalDurabilityCost.Value && job.Weapon.m_shared.m_useDurability)
+            if (job.Player.GetCurrentWeapon() != job.Weapon)
             {
-                float durabilityCost = job.Weapon.m_shared.m_useDurabilityDrain *
-                                       Mathf.Max(0f, DurabilityCostMultiplier.Value);
+                return false;
+            }
+
+            float staminaCost = Mathf.Max(0f, AdditionalStaminaPerSection.Value);
+            if (staminaCost > 0f && !job.Player.HaveStamina(staminaCost))
+            {
+                return false;
+            }
+
+            if (job.Weapon.m_shared.m_useDurability)
+            {
                 if (job.Weapon.m_durability <= 0f)
                 {
                     return false;
                 }
+
+                float durabilityCost = Mathf.Max(
+                    0f,
+                    job.Weapon.m_shared.m_useDurabilityDrain * Game.m_durabilityRate);
                 job.Weapon.m_durability = Mathf.Max(0f, job.Weapon.m_durability - durabilityCost);
             }
 
-            float staminaCost = Mathf.Max(0f, AdditionalStaminaPerSection.Value);
             if (staminaCost > 0f)
             {
-                if (!job.Player.HaveStamina(staminaCost))
-                {
-                    return false;
-                }
                 job.Player.UseStamina(staminaCost);
             }
 
@@ -316,10 +302,8 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
             return false;
         }
 
-        int maximum = Mathf.Clamp(MaximumSections.Value, 1, 2048);
         List<MiningTarget> orderedTargets = targets
             .OrderBy(target => (target.Point - hit.m_point).sqrMagnitude)
-            .Take(maximum)
             .ToList();
 
         _activeTargets.Add(instanceId);

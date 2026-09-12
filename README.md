@@ -2,17 +2,17 @@
 
 DadsVeinmine provides whole-deposit vein mining through Valheim 1.0.12's native `MineRock` and `MineRock5` damage handlers.
 
-Hold `Left Alt` while striking a mine rock or ore deposit with a valid pickaxe. DadsVeinmine processes the deposit's remaining sections while Valheim retains control of tool-tier checks, section health, network ownership, effects, statistics, and normal item drops.
+Hold `Left Alt` while striking a mine rock or ore deposit with a valid pickaxe. DadsVeinmine processes every remaining section through Valheim's native mining handlers, breaking and removing the deposit as it advances. Each additional section consumes the pickaxe's normal per-use durability, and processing stops when the pickaxe reaches zero durability.
 
 ## Configuration
 
 - Activation mode: `HoldKey`, `AlwaysOn`, or `Off`.
 - Configurable activation shortcut.
-- Maximum sections per strike.
 - Sections processed per frame.
 - Case-insensitive prefab exclusions.
 - Optional progressive radius based on Pickaxes skill.
-- Configurable additional durability, stamina, and Pickaxes skill costs.
+- Normal pickaxe durability cost for every mined section.
+- Configurable additional stamina and Pickaxes skill costs.
 
 Configuration path: `BepInEx/config/com.dadisbored.dadsveinmine.cfg`.
 
