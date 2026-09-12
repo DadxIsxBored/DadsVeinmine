@@ -16,7 +16,7 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
 {
     public const string PluginGuid = "com.dadisbored.dadsveinmine";
     public const string PluginName = "DadsVeinmine";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginVersion = "1.0.1";
 
     internal enum ActivationModes
     {

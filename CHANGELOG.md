@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Replaced the package icon with original artwork featuring a complete, continuous mining pickaxe.
+
 ## 1.0.0
 
 - Added whole-deposit mining for Valheim `MineRock` deposits.
