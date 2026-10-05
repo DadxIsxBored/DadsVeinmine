@@ -16,7 +16,7 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
 {
     public const string PluginGuid = "com.dadisbored.dadsveinmine";
     public const string PluginName = "DadsVeinmine";
-    public const string PluginVersion = "1.0.2";
+    public const string PluginVersion = "1.0.3";
 
     internal enum ActivationModes
     {
@@ -120,24 +120,23 @@ public sealed class DadsVeinminePlugin : BaseUnityPlugin
 
     private void Update()
     {
-        for (int jobIndex = _jobs.Count - 1; jobIndex >= 0; jobIndex--)
+        int remaining = Mathf.Clamp(SectionsPerFrame.Value, 1, 64);
+        while (remaining > 0 && _jobs.Count > 0)
         {
-            MiningJob job = _jobs[jobIndex];
-            int workCount = Mathf.Clamp(SectionsPerFrame.Value, 1, 64);
-
-            while (workCount-- > 0 && job.NextTarget < job.Targets.Count)
+            for (int jobIndex = _jobs.Count - 1; jobIndex >= 0 && remaining > 0; jobIndex--)
             {
-                if (!ProcessNextTarget(job))
+                MiningJob job = _jobs[jobIndex];
+                if (job.NextTarget < job.Targets.Count)
                 {
-                    job.NextTarget = job.Targets.Count;
-                    break;
+                    remaining--;
+                    if (!ProcessNextTarget(job)) job.NextTarget = job.Targets.Count;
                 }
-            }
 
-            if (job.NextTarget >= job.Targets.Count)
-            {
-                _activeTargets.Remove(job.TargetInstanceId);
-                _jobs.RemoveAt(jobIndex);
+                if (job.NextTarget >= job.Targets.Count)
+                {
+                    _activeTargets.Remove(job.TargetInstanceId);
+                    _jobs.RemoveAt(jobIndex);
+                }
             }
         }
     }
